@@ -1,0 +1,25 @@
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        "chrome": 60
+      },
+      "modules": false
+    }],
+    "react",
+    "stage-3"
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        ["env", {
+          "targets": {
+            "chrome": 60
+          }
+        }],
+        "react",
+        "stage-3"
+      ]
+    }
+  }
+}

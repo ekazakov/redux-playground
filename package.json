@@ -1,0 +1,33 @@
+{
+  "name": "redux-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "storybook": "start-storybook -p 9001 -c .storybook"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@storybook/react": "^3.2.16",
+    "babel-core": "^6.26.0",
+    "babel-jest": "^21.2.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "jest": "^21.2.1",
+    "regenerator-runtime": "^0.11.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
+    "react-redux": "^5.0.6",
+    "react-thunk": "^1.0.0",
+    "redux": "^3.7.2",
+    "redux-devtools-extension": "^2.13.2",
+    "redux-loop": "^4.2.4",
+    "redux-thunk": "^2.2.0"
+  }
+}
