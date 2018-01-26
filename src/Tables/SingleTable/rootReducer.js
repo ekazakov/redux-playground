@@ -1,7 +1,7 @@
 import includes from 'lodash/includes';
-import records from '../Tables/data/dataA.json';
+import records from '../data/dataA.json';
 import types from './actions';
-import { newState } from '../utils';
+import { newState } from '../../utils';
 import { combineReducers } from 'redux';
 
 const paginationInitialState = {

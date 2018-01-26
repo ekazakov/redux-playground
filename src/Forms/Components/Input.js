@@ -8,7 +8,7 @@ export default function Input(props) {
     return (
         <input
             {...restProps}
-            onChange={({ event: { target: { value }}}) => onChange(value)}
+            onChange={({ target: { value } }) => onChange(value)}
         />
     )
 }

@@ -1,7 +1,7 @@
 import {
     applyFilter,
     applyPagination
-} from '../../utils';
+} from '../../../utils';
 
 const TableStateToProps = (state) => {
     const { records, filter, pagination } = state.tableA;

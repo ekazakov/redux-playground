@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Table from '../../Tables/Components/Table/Table';
-import Pagination from '../../Tables/Components/Pagination/Pagination';
-import Filter from '../../Tables/Components/Filter/Filter';
+import Table from '../../Components/Table/Table';
+import Pagination from '../../Components/Pagination/Pagination';
+import Filter from '../../Components/Filter/Filter';
 import {
     ageFromInputChanged,
     ageToInputChanged,

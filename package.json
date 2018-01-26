@@ -20,14 +20,22 @@
     "regenerator-runtime": "^0.11.0"
   },
   "dependencies": {
+    "date-fns": "^1.29.0",
+    "emotion": "^8.0.12",
+    "history": "^4.7.2",
     "lodash": "^4.17.4",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
+    "react-emotion": "^8.0.12",
+    "react-matcher": "^1.0.0",
     "react-redux": "^5.0.6",
     "react-thunk": "^1.0.0",
     "redux": "^3.7.2",
     "redux-devtools-extension": "^2.13.2",
+    "redux-first-router": "0.0.16-next",
+    "redux-first-router-link": "^1.4.2",
     "redux-loop": "^4.2.4",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "prop-types": "latest"
   }
 }
