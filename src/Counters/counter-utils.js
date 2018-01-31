@@ -97,6 +97,9 @@ export const actionFor = (name, action) =>
         action
 ;
 
+export const isForwarded = (action) => (action && action.type === FORWARD);
+
+
 // returns a new dispatch that wraps and forwards the actions with the given name
 export const forwardTo = (name, dispatch) =>
     action =>

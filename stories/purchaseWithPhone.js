@@ -9,6 +9,9 @@ const history = createHistory();
 window._history = history;
 const store = configureStore(history);
 
+history.listen((...args) => {
+    console.log('history change', ...args);
+});
 stories.add('Purchase', () => {
    return (
        <Provider store={store}>
