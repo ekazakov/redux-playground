@@ -73,9 +73,13 @@ const Content = styled('div')`
 export default class BrowserFrame extends React.Component {
     constructor(...args) {
         super(...args);
-
+        const {
+            history: {
+                location: { pathname, search }
+            }
+        } = this.props;
         this.state = {
-            location: '/'
+            location: `${pathname}${search}`
         };
     }
 

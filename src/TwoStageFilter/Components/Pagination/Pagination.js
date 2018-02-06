@@ -1,7 +1,11 @@
 import React from 'react';
 import times from 'lodash/times';
+import { Cmd, loop, liftState } from 'redux-loop';
 import { newState } from '../../../utils';
-import { localConnect } from '../../../Counters/counter-utils';
+import { localConnect } from '../../../utils2';
+import {
+    addToQuery
+} from '../../effects';
 
 const buttonStyle = (isSelected) => ({
     border:  isSelected ? '1px solid #333' : 'none',
@@ -54,12 +58,17 @@ export const initialState = {
 
 export function reducer(state = initialState, { type, payload } = {}) {
     if (type === CHANGE_PAGE) {
-        return newState(state, {
-            page: payload.page,
-        });
+        return loop(
+            newState(state, {
+                page: payload.page,
+            }),
+            Cmd.run(addToQuery, {
+                args: [{ page: payload.page }]
+            })
+        );
     }
 
-    return state;
+    return liftState(state);
 }
 
 function Pagination (props) {
@@ -69,8 +78,10 @@ function Pagination (props) {
         size,
         dispatch,
     } = props;
-
     const totalPages = Math.ceil(size / pageSize);
+    const onClick = (page) => {
+        dispatch(changePage(page));
+    };
 
     return (
         <div style={style}>
@@ -79,7 +90,7 @@ function Pagination (props) {
                     key={index}
                     page={index + 1}
                     isSelected={page === (index + 1)}
-                    onClick={() => dispatch(changePage(index + 1))}
+                    onClick={() => onClick(index + 1)}
                 />
             ))}
         </div>

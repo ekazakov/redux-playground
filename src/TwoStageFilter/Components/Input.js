@@ -1,5 +1,6 @@
 import React from 'react';
 import { newState } from '../../utils';
+import { createReducer } from '../../utils2';
 
 export const CHANGE_INPUT = '@@app/CHANGE_INPUT';
 
@@ -10,13 +11,11 @@ export function changeInput(value) {
     };
 }
 
-export function reducer(state, { type, payload } = {}) {
-    if (type === CHANGE_INPUT) {
-        return parseInt(payload.value);
-    }
-
-    return state;
-}
+export const reducer = createReducer({
+    [CHANGE_INPUT]: (state, { payload } = {}) => {
+        return parseInt(payload.value)
+    },
+});
 
 export const view = function Input(props) {
     const {

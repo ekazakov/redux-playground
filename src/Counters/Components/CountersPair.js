@@ -2,7 +2,7 @@ import React from 'react';
 import {
     forwardTo,
     localConnect
-} from '../counter-utils';
+} from '../../utils2';
 import { Counter } from './Counter';
 
 const getTopState = state => state.top;

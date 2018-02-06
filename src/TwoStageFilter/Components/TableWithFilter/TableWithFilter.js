@@ -1,22 +1,37 @@
 import React from 'react';
+import {
+    getModel,
+    getCmd,
+    loop,
+    liftState,
+    Cmd,
+} from 'redux-loop'
 import * as Table from '../Table/Table';
 import * as Filter from '../Filter/Filter';
 import records from '../../../Tables/data/dataA.json';
 import {
+    FORWARD,
     actionFor,
     forwardTo,
+    getActionName,
+    isActionFor,
     localConnect,
     unwrap,
-    updateProperty
-} from '../../../Counters/counter-utils';
+    unwrapOnce,
+    updateProperty,
+    wrapTo,
+    createReducer,
+    newLiftedState
+} from '../../../utils2';
 import {
     applyFilter,
-    applyPagination
+    applyPagination,
+    newState
 } from '../../../utils';
 import * as Pagination from '../Pagination/Pagination';
 
-const FILTER = '@app/FILTER';
-const PAGINATION = '@app/PAGINATION';
+export const FILTER = '@app/FILTER';
+export const PAGINATION = '@app/PAGINATION';
 
 export const initialState = {
     records,
@@ -24,25 +39,82 @@ export const initialState = {
     pagination: Pagination.initialState,
 };
 
-export function reducer(state = initialState, action) {
-    let nextState = updateProperty(
-        state,
-        'filter',
-        Filter.reducer(state.filter, actionFor(FILTER, action))
-    );
+const subReducer2 = createReducer({
+    [FILTER]: (state, action) => {
+        let nextState = newLiftedState(
+            state,
+            'filter',
+            Filter.reducer(state.filter, unwrapOnce(action))
+        );
 
-    nextState = updateProperty(
-        nextState,
-        'pagination',
-        Pagination.reducer(nextState.pagination, actionFor(PAGINATION, action))
-    );
+        const { type } = unwrap(action);
+        if (type === Filter.APPLY_FILTER || type === Filter.RESET_FILTER) {
+            nextState = newLiftedState(
+                nextState,
+                'pagination',
+                Pagination.reducer(getModel(nextState).pagination, Pagination.changePage(1))
+            );
+        }
 
-    if (actionFor(FILTER, action)) {
-        nextState.pagination.page = 1;
+        return nextState;
+    },
+    [PAGINATION]: (state, action) => {
+        return newLiftedState(
+            state,
+            'pagination',
+            Pagination.reducer(state.pagination, unwrapOnce(action))
+        );
+    },
+}, getActionName);
+
+const subReducer = createReducer({
+    [FILTER]: (state, action) => {
+        const filter = liftState(
+            Filter.reducer(state.filter, unwrapOnce(action))
+        );
+        let nextState = updateProperty(state, 'filter', getModel(filter));
+
+        const { type } = unwrap(action);
+        if (type === Filter.APPLY_FILTER || type === Filter.RESET_FILTER) {
+            const pagination = Pagination.reducer(
+                nextState.pagination, Pagination.changePage(1)
+            );
+            nextState = newState(nextState, {
+                pagination: getModel(pagination)
+            });
+
+            return loop(nextState, Cmd.list([
+                getCmd(pagination),
+                getCmd(filter)
+            ]));
+        }
+
+        return loop(nextState, Cmd.list([
+            getCmd(filter)
+        ]));
+    },
+
+    [PAGINATION]: (state, action) => {
+        const pagination = Pagination.reducer(
+            state.pagination, unwrapOnce(action)
+        );
+        const nextState = newState(state, {
+            pagination: getModel(pagination)
+        });
+
+        return loop(nextState, Cmd.list([
+            getCmd(pagination)
+        ]));
+    },
+}, getActionName);
+
+export const reducer = createReducer({
+    [FORWARD]: (state = initialState, action) => {
+        return liftState(
+            subReducer2(state, action)
+        );
     }
-
-    return nextState;
-}
+});
 
 const style = {
     display: 'flex',
@@ -56,15 +128,13 @@ function TableWithFilter(props) {
         dispatch,
         records,
         size,
-        page,
     } = props;
-    console.log(props);
+
     return (
         <div style={style}>
             <div>
                 <Table.view records={records} />
                 <Pagination.view
-                    page={page}
                     size={size}
                     selector={getPaginationState}
                     dispatch={forwardTo(PAGINATION, dispatch)}

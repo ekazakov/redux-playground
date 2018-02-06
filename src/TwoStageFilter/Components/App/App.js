@@ -1,15 +1,15 @@
 import React from 'react';
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-loop';
 import { connect } from 'react-redux';
 import Navigation from '../Navigation/Navigation';
 import HomePage from '../Pages/HomePage';
-import TablePage from '../Pages/TablePage';
+import * as TablePage from '../Pages/TablePage';
 import OtherPage from '../Pages/OtherPage';
-import * as TableWithFilter from '../TableWithFilter/TableWithFilter';
+
 
 const pages = {
     home: HomePage,
-    table: TablePage,
+    table: TablePage.view,
     other: OtherPage,
 };
 
@@ -28,7 +28,7 @@ function pageReducer(state = 'home', { type }) {
 
 export const reducer = combineReducers({
     page: pageReducer,
-    table: TableWithFilter.reducer
+    tablePage: TablePage.reducer
 });
 
 function App(props) {

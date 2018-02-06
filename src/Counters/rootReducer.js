@@ -2,7 +2,7 @@ import types from './actions';
 import {
     actionFor,
     updateProperty
-} from './counter-utils';
+} from '../utils2';
 const initialState = 0;
 
 const counterReducer = (state = initialState, action) => {

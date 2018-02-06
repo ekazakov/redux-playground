@@ -1,7 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {connect as reduxConnect} from 'react-redux'
-import { curry } from 'lodash';
+import {
+    merge,
+    set,
+    compact,
+    curry,
+    get,
+} from 'lodash';
+import {
+    Cmd,
+    getCmd,
+    getModel,
+    liftState,
+    loop
+} from 'redux-loop';
 
 const identity = (state) => state;
 
@@ -74,7 +87,7 @@ export const localConnect = (mapStateToProps = identity, mapDispatchToProps = de
         return withLocalSelector(ReduxComponent)
     };
 
-const FORWARD = '@redux-forward/FORWARD';
+export const FORWARD = '@redux-forward/FORWARD';
 
 // wrap an action into a forward action
 export const wrapTo = curry(
@@ -85,6 +98,19 @@ export const wrapTo = curry(
 // unwrap recursively an action
 export const unwrap = (action) =>
     action && action.type === FORWARD ? unwrap(action.payload) : action;
+
+export const unwrapOnce = (action) =>
+    action && action.type === FORWARD ? action.payload : action;
+
+export const isActionFor = (name, action) => {
+    if (isForwarded(action)) {
+        return (action.meta.name === name);
+    }
+
+    return false
+};
+
+export const getActionName = (action) => get(action, 'meta.name', 'unknown');
 
 // given a name to forward to, returns the action for that name
 export const actionFor = (name, action) =>
@@ -116,3 +142,39 @@ export const updateProperty = (state, propName, nextPropValue) => {
         [propName]: nextPropValue
     }
 };
+
+export function newLiftedState(state, path, update) {
+    const liftedState = liftState(state);
+    const model = getModel(liftedState);
+    const cmd = getCmd(liftedState);
+
+    const liftedUpdate = liftState(update);
+    const updateModel = getModel(liftedUpdate);
+    const updateCmd = getCmd(liftedUpdate);
+
+    const nextState = merge({}, model);
+    set(nextState, path, updateModel);
+    const cmdList = [cmd].concat(updateCmd);
+
+    return loop(nextState, Cmd.list(compact(cmdList)));
+}
+
+export function switchCase(cases) {
+    return (defaultCase) => (key) => {
+        return (key in cases) ? cases[key] : defaultCase;
+    };
+}
+
+export function executeIfFunction(func, ...args) {
+    return typeof func === 'function' ? func(...args) : func;
+}
+
+export function createReducer(cases, selector = (action) => action.type) {
+    return (state, action) =>
+        executeIfFunction(
+            switchCase(cases)(liftState(state))(selector(action)),
+            state,
+            action
+        )
+        ;
+}

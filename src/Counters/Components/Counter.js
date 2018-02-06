@@ -1,5 +1,5 @@
 import React from 'react';
-import { localConnect } from '../counter-utils';
+import { localConnect } from '../../utils2';
 import * as actions from '../actions';
 
 export const Counter = localConnect(

@@ -1,14 +1,17 @@
 import React from 'react';
+import { Cmd, loop, liftState } from 'redux-loop';
 import * as Range from '../Range';
 import {
-    actionFor,
+    createReducer,
+    FORWARD,
     forwardTo,
-    isForwarded,
+    getActionName,
     localConnect,
-    unwrap,
-    updateProperty
-} from '../../../Counters/counter-utils';
+    newLiftedState,
+    unwrapOnce,
+} from '../../../utils2';
 import { newState } from '../../../utils';
+import { addToQuery } from '../../effects';
 
 const foo = {
     amount: {
@@ -29,8 +32,8 @@ export const initialsState = {
 const AGE = '@app/AGE';
 const AMOUNT = '@app/AMOUNT';
 
-const APPLY_FILTER = '@@app/APPLY_FILTER';
-const RESET_FILTER = '@@app/RESET_FILTER';
+export const APPLY_FILTER = '@@app/APPLY_FILTER';
+export const RESET_FILTER = '@@app/RESET_FILTER';
 
 function applyFilter() {
     return { type: APPLY_FILTER };
@@ -40,38 +43,57 @@ function resetFilter() {
     return { type: RESET_FILTER };
 }
 
+const subReducer = createReducer({
+    [AGE]: (state, action) => {
+        return newLiftedState(
+            state,
+            'currentState.age',
+            Range.reducer(state.currentState.age, unwrapOnce(action))
+        );
+    },
+    [AMOUNT]: (state, action) => {
+        return newLiftedState(
+            state,
+            'currentState.amount',
+            Range.reducer(state.currentState.amount, unwrapOnce(action))
+        );
+    },
+}, getActionName);
 
-export function reducer(state = initialsState, action = {}) {
-    if (isForwarded(action)) {
-        if (actionFor(AGE, action)) {
-            return newState(state, {
-                currentState: {
-                    age: Range.reducer(state.currentState.age, actionFor(AGE, action))
-                }
-            });
-        }
+export const reducer = createReducer({
+    [APPLY_FILTER]: (state) => {
+        return newLiftedState(
+            state,
+            'appliedState',
+            loop(
+                state.currentState,
+                Cmd.run(addToQuery, {
+                    args: [{
+                        ageFrom: state.currentState.age.from,
+                        ageTo: state.currentState.age.to,
+                        amountFrom: state.currentState.amount.from,
+                        amountTo: state.currentState.amount.to,
+                    }]
+                })
+            )
+        )
+    },
+    [RESET_FILTER]: (state) => {
+        return loop(
+            newState(state, initialsState),
+            Cmd.run(addToQuery, {
+                args: [{
+                    ageFrom: initialsState.currentState.age.from,
+                    ageTo: initialsState.currentState.age.to,
+                    amountFrom: initialsState.currentState.amount.from,
+                    amountTo: initialsState.currentState.amount.to,
+                }]
+            })
+        );
+    },
+    [FORWARD]: subReducer
+});
 
-        if (actionFor(AMOUNT, action)) {
-            return newState(state, {
-                currentState: {
-                    amount: Range.reducer(state.currentState.amount, actionFor(AMOUNT, action))
-                }
-            });
-        }
-    }
-
-    switch (action.type) {
-    case APPLY_FILTER:
-        return newState(state, {
-            appliedState: state.currentState,
-        });
-
-    case RESET_FILTER:
-        return newState(state, initialsState);
-    }
-
-    return state;
-}
 
 function Filter(props) {
     const {
@@ -88,15 +110,11 @@ function Filter(props) {
                 label="Age"
                 {...age}
                 dispatch={forwardTo(AGE, dispatch)}
-                // onFromChange={ageFromInputChanged}
-                // onToChange={ageToInputChanged}
             />
             <Range.view
                 label="Amount"
                 {...amount}
                 dispatch={forwardTo(AMOUNT, dispatch)}
-                // onFromChange={amountFromInputChanged}
-                // onToChange={amountToInputChanged}
             />
             <div>
                 <button onClick={() => dispatch(applyFilter())}>Apply</button>
